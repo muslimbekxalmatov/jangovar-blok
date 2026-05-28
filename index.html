@@ -1,205 +1,488 @@
+```html
 <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boks Chempionati - Realistik Jang</title>
+<title>Real Boxing Game</title>
+
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Arial', sans-serif; background: #06060c; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-  #app { width: 100%; max-width: 480px; background: #11111e; border: 2px solid #22223b; border-radius: 24px; padding: 1.2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.7); overflow: hidden; }
-  
-  .screen { display: none; }
-  .screen.active { display: block; }
-  
-  /* Menu */
-  .logo h1 { font-size: 2.8rem; color: #e74c3c; text-shadow: 0 0 10px rgba(231, 76, 60, 0.4); margin-top: 1rem; }
-  .logo p { color: #777; margin-bottom: 2rem; font-size: 0.95rem; }
-  .menu-box { background: #161629; border: 1px solid #2a2a44; border-radius: 16px; padding: 1.5rem; }
-  .mode-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
-  .m-btn { background: #0b0b14; border: 2px solid #2a2a44; border-radius: 12px; padding: 1.2rem 1rem; cursor: pointer; color: #aaa; font-weight: bold; transition: all 0.2s; }
-  .m-btn.sel { border-color: #e74c3c; background: #2c161d; color: #fff; box-shadow: 0 0 12px rgba(231, 76, 60, 0.2); }
-  .start-btn { width: 100%; padding: 16px; background: #e74c3c; border: none; border-radius: 12px; color: #fff; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-  
-  /* Game UI */
-  .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .round { background: #22223b; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; color: #f1c40f; }
-  
-  /* Status Bars */
-  .fighters-status { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 1rem; }
-  .status-card { background: #161629; border: 1px solid #2a2a44; border-radius: 12px; padding: 0.8rem; text-align: left; }
-  .name { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #ddd; }
-  
-  /* HP and Stamina Bars */
-  .bar-label { font-size: 0.65rem; color: #888; margin-top: 4px; display: flex; justify-content: space-between; }
-  .bar-bg { background: #090910; border-radius: 4px; height: 10px; overflow: hidden; margin-bottom: 4px; border: 1px solid #222; }
-  .fill { height: 100%; width: 100%; transition: width 0.25s ease-out; }
-  .hp-p { background: linear-gradient(90deg, #2ecc71, #27ae60); }
-  .hp-e { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-  .stamina-fill { background: linear-gradient(90deg, #3498db, #2980b9); }
 
-  /* REALISTIC RING */
-  .ring { background: linear-gradient(to bottom, #111122 0%, #1c1c32 100%); border: 4px solid #333; border-bottom: 8px solid #555; border-radius: 16px; height: 180px; position: relative; margin-bottom: 1rem; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 50px 20px; overflow: hidden; }
-  .ring::before { content: ''; position: absolute; left: 0; right: 0; top: 40px; height: 4px; background: #e74c3c; opacity: 0.7; box-shadow: 0 40px 0 #fff, 0 80px 0 #3498db; }
-  
-  /* Boxer Emojilari va Animatsiyalar */
-  .boxer { font-size: 3.5rem; position: relative; transition: all 0.2s ease; user-select: none; bottom: 0; }
-  #p-boxer { transform: scaleX(1); }
-  #e-boxer { transform: scaleX(-1); }
-  
-  /* Anims */
-  .att-p { animation: attP 0.25s ease; }
-  .att-e { animation: attE 0.25s ease; }
-  .hit-shake { animation: shake 0.2s ease; filter: brightness(2) saturate(3); }
-  .block-state { transform: scale(0.85) translateY(5px) !important; opacity: 0.6; }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-  @keyframes attP { 0%{ left: 0; } 50%{ left: 60px; transform: scale(1.1); } 100%{ left: 0; } }
-  @keyframes attE { 0%{ right: 0; } 50%{ right: 60px; transform: scaleX(-1) scale(1.1); } 100%{ right: 0; } }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+body{
+  background:#05050a;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:white;
+}
 
-  /* Damage FX Popup */
-  .damage-txt { position: absolute; top: 40px; left: 40%; font-size: 1.5rem; font-weight: 900; color: #f1c40f; animation: floatUp 0.4s ease-out forwards; display: none; text-shadow: 0 2px 4px #000; z-index: 5; }
-  @keyframes floatUp { 0% { transform: translateY(0) scale(0.7); opacity: 1; } 100% { transform: translateY(-30px) scale(1.3); opacity: 0; } }
+#game{
+  width:420px;
+  background:#111122;
+  border-radius:20px;
+  padding:20px;
+  border:2px solid #222;
+  box-shadow:0 0 30px rgba(0,0,0,.7);
+}
 
-  /* Controls */
-  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
-  .ctrl-btn { padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; color: #fff; cursor: pointer; transition: background 0.1s; }
-  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-atk { background: #e74c3c; }
-  .btn-def { background: #3498db; }
-  
-  /* Log output */
-  .referee-log { background: #090910; border: 1px solid #222; border-radius: 10px; padding: 0.8rem; font-size: 0.85rem; height: 65px; overflow-y: auto; text-align: left; color: #ccc; font-style: italic; }
-  .quit { background: none; border: none; color: #555; cursor: pointer; font-size: 0.85rem; margin-top: 10px; font-weight: bold; text-decoration: underline; }
+.title{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.title h1{
+  color:#ff3b30;
+}
+
+.status{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.card{
+  flex:1;
+  background:#19192d;
+  padding:10px;
+  border-radius:12px;
+}
+
+.name{
+  font-size:14px;
+  margin-bottom:8px;
+  font-weight:bold;
+}
+
+.bar{
+  width:100%;
+  height:12px;
+  background:#05050a;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:5px;
+}
+
+.fill{
+  height:100%;
+  width:100%;
+  transition:.3s;
+}
+
+.hpP{
+  background:linear-gradient(to right,#2ecc71,#27ae60);
+}
+
+.hpE{
+  background:linear-gradient(to right,#ff3b30,#c0392b);
+}
+
+.st{
+  background:linear-gradient(to right,#3498db,#2980b9);
+}
+
+.small{
+  font-size:12px;
+  color:#aaa;
+}
+
+.ring{
+  position:relative;
+  height:220px;
+  background:linear-gradient(to bottom,#111,#222);
+  border:4px solid #444;
+  border-radius:15px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+
+.rope{
+  position:absolute;
+  width:100%;
+  height:4px;
+  background:red;
+  top:50px;
+  box-shadow:0 50px 0 white;
+}
+
+.boxer{
+  position:absolute;
+  bottom:20px;
+  font-size:70px;
+  transition:.2s;
+}
+
+#player{
+  left:50px;
+}
+
+#enemy{
+  right:50px;
+  transform:scaleX(-1);
+}
+
+.attackP{
+  animation:attackP .25s;
+}
+
+.attackE{
+  animation:attackE .25s;
+}
+
+.hit{
+  animation:hit .2s;
+}
+
+.block{
+  transform:scale(.8);
+  opacity:.6;
+}
+
+@keyframes attackP{
+  0%{left:50px;}
+  50%{left:120px;}
+  100%{left:50px;}
+}
+
+@keyframes attackE{
+  0%{right:50px;}
+  50%{right:120px;}
+  100%{right:50px;}
+}
+
+@keyframes hit{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-10px);}
+  50%{transform:translateX(10px);}
+  100%{transform:translateX(0);}
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+button{
+  border:none;
+  padding:15px;
+  border-radius:12px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.attackBtn{
+  background:#ff3b30;
+}
+
+.blockBtn{
+  background:#3498db;
+}
+
+.log{
+  background:#08080f;
+  border:1px solid #222;
+  padding:10px;
+  border-radius:10px;
+  height:70px;
+  overflow:auto;
+  color:#ccc;
+  font-size:14px;
+}
+
+.damage{
+  position:absolute;
+  top:40px;
+  left:45%;
+  font-size:30px;
+  font-weight:bold;
+  color:yellow;
+  display:none;
+  animation:pop .5s;
+}
+
+@keyframes pop{
+  0%{
+    transform:translateY(0) scale(.5);
+    opacity:1;
+  }
+
+  100%{
+    transform:translateY(-40px) scale(1.3);
+    opacity:0;
+  }
+}
+
 </style>
 </head>
-<body>
-<div id="app">
 
-  <!-- 1. BOSH MENYU -->
-  <div id="s-menu" class="screen active">
-    <div class="logo">
-      <h1>BOXING CHAMP</h1>
-      <p>Professional Taktik Boks Simulyatori</p>
-    </div>
-    <div class="menu-box">
-      <span style="font-size:0.9rem; color:#888;">RAQIB TOIFASI:</span>
-      <div class="mode-select">
-        <button class="m-btn sel" id="m-bot" onclick="changeMode('bot')">🤖 VS BOT<br><small style="font-weight:normal; font-size:0.7rem;">Mashg'ulot</small></button>
-        <button class="m-btn" id="m-pvp" onclick="changeMode('pvp')">🥷 VS ODAM<br><small style="font-weight:normal; font-size:0.7rem;">Onlayn Sparring</small></button>
-      </div>
-      <button class="start-btn" onclick="startFight()">Ringga chiqish 🥊</button>
-    </div>
+<body>
+
+<div id="game">
+
+  <div class="title">
+    <h1>🥊 BOXING CHAMP</h1>
+    <p>Realistic Fight Simulator</p>
   </div>
 
-  <!-- 2. JANG EKRANI -->
-  <div id="s-game" class="screen">
-    <div class="hud">
-      <span id="game-type" style="font-size:0.8rem; font-weight:bold; color:#888;">PROFESSIONAL MATCH</span>
-      <span class="round">RAUND 1</span>
-    </div>
-    
-    <!-- STATUSLAR -->
-    <div class="fighters-status">
-      <!-- Player -->
-      <div class="status-card">
-        <div class="name">Siz (KIRKLAND)</div>
-        <div class="bar-bg"><div id="p-hp" class="fill hp-p"></div></div>
-        <div class="bar-bg" style="height:6px;"><div id="p-stamina" class="fill stamina-fill"></div></div>
-        <div class="bar-label"><span>HP</span><span id="p-st-num">STAMINA: 100%</span></div>
+  <div class="status">
+
+    <div class="card">
+      <div class="name">SIZ</div>
+
+      <div class="bar">
+        <div id="pHP" class="fill hpP"></div>
       </div>
-      <div style="font-weight:bold; color:#444;">VS</div>
-      <!-- Enemy -->
-      <div class="status-card">
-        <div id="e-name" class="name">Raqib (TAISON)</div>
-        <div class="bar-bg"><div id="e-hp" class="fill hp-e"></div></div>
-        <div class="bar-bg" style="height:6px;"><div id="e-stamina" class="fill stamina-fill"></div></div>
-        <div class="bar-label"><span>HP</span><span id="e-st-num">STAMINA: 100%</span></div>
+
+      <div class="bar" style="height:6px;">
+        <div id="pST" class="fill st"></div>
+      </div>
+
+      <div class="small" id="pText">
+        STAMINA 100%
       </div>
     </div>
 
-    <!-- REAL RING ARENA -->
-    <div class="ring">
-      <div id="pop-fx" class="damage-txt">💥 -20 HP</div>
-      <div id="p-boxer" class="boxer">🕺</div>
-      <div id="e-boxer" class="boxer">🥷</div>
+    <div class="card">
+      <div class="name">BOT</div>
+
+      <div class="bar">
+        <div id="eHP" class="fill hpE"></div>
+      </div>
+
+      <div class="bar" style="height:6px;">
+        <div id="eST" class="fill st"></div>
+      </div>
+
+      <div class="small" id="eText">
+        STAMINA 100%
+      </div>
     </div>
 
-    <!-- REAL JANG TUGMALARI -->
-    <div class="controls">
-      <button id="btn-punch" class="ctrl-btn btn-atk" onclick="executeAction('punch')">🥊 JAB / ZARBA</button>
-      <button id="btn-block" class="ctrl-btn btn-def" onclick="executeAction('block')">🛡️ BLOK / HIMOYALANISH</button>
+  </div>
+
+  <div class="ring">
+
+    <div class="rope"></div>
+
+    <div id="damage" class="damage">
+      -20
     </div>
 
-    <!-- REFEREE LOG -->
-    <div id="log-text" class="referee-log">
-      Smit referi: "Faqat toza jang bo'lsin! Box!"
+    <div id="player" class="boxer">
+      🥊
     </div>
-    
-    <button class="quit" onclick="exitToMenu()">Ringdan qochish (Chiqish)</button>
+
+    <div id="enemy" class="boxer">
+      🤖
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button class="attackBtn" onclick="fight('attack')">
+      🥊 ZARBA
+    </button>
+
+    <button class="blockBtn" onclick="fight('block')">
+      🛡️ BLOK
+    </button>
+  </div>
+
+  <div id="log" class="log">
+    Jang boshlandi!
   </div>
 
 </div>
 
 <script>
-  let mode = 'bot';
-  let pHP = 100, pStamina = 100;
-  let eHP = 100, eStamina = 100;
-  let isActionRunning = false;
 
-  function changeMode(m) {
-    mode = m;
-    document.getElementById('m-bot').classList.remove('sel');
-    document.getElementById('m-pvp').classList.remove('sel');
-    document.getElementById('m-'+m).classList.add('sel');
+let playerHP = 100;
+let enemyHP = 100;
+
+let playerST = 100;
+let enemyST = 100;
+
+let busy = false;
+
+function updateUI(){
+
+  document.getElementById("pHP").style.width =
+    playerHP + "%";
+
+  document.getElementById("eHP").style.width =
+    enemyHP + "%";
+
+  document.getElementById("pST").style.width =
+    playerST + "%";
+
+  document.getElementById("eST").style.width =
+    enemyST + "%";
+
+  document.getElementById("pText").innerText =
+    "STAMINA " + Math.floor(playerST) + "%";
+
+  document.getElementById("eText").innerText =
+    "STAMINA " + Math.floor(enemyST) + "%";
+}
+
+function popup(txt){
+
+  let d = document.getElementById("damage");
+
+  d.innerText = txt;
+
+  d.style.display = "block";
+
+  setTimeout(()=>{
+    d.style.display = "none";
+  },500);
+}
+
+function fight(action){
+
+  if(busy) return;
+
+  if(playerHP <= 0 || enemyHP <= 0) return;
+
+  busy = true;
+
+  let enemyAction;
+
+  if(enemyST < 30){
+    enemyAction = Math.random() < 0.7
+      ? "block"
+      : "attack";
+  }else{
+    enemyAction = Math.random() < 0.5
+      ? "attack"
+      : "block";
   }
 
-  function startFight() {
-    pHP = 100; pStamina = 100;
-    eHP = 100; eStamina = 100;
-    isActionRunning = false;
-    
-    document.getElementById('p-boxer').innerText = "🕺";
-    if(mode === 'pvp') {
-      document.getElementById('e-name').innerText = 'Odam (CHEVChENKO)';
-      document.getElementById('game-type').innerText = 'LIVE MULTIPLAYER';
-      document.getElementById('e-boxer').innerText = "🥷";
-    } else {
-      document.getElementById('e-name').innerText = 'Raqib (BOT TAISON)';
-      document.getElementById('game-type').innerText = 'SINGLE TRAINING';
-      document.getElementById('e-boxer').innerText = "🤖";
+  let p = document.getElementById("player");
+  let e = document.getElementById("enemy");
+
+  p.className = "boxer";
+  e.className = "boxer";
+
+  let text = "";
+
+  // PLAYER
+  if(action === "attack"){
+
+    p.classList.add("attackP");
+
+    playerST -= 15;
+
+    if(enemyAction === "block"){
+
+      e.classList.add("block");
+
+      text += "Bot zarbani blok qildi<br>";
+
+    }else{
+
+      let dmg =
+        Math.floor(Math.random()*15)+10;
+
+      if(playerST < 30){
+        dmg -= 5;
+      }
+
+      enemyHP -= dmg;
+
+      e.classList.add("hit");
+
+      popup("-"+dmg);
+
+      text += "Siz urdingiz -" + dmg + " HP<br>";
     }
-    
-    updateUIBars();
-    document.getElementById('log-text').innerHTML = 'Smit referi: "Gong chalindi! Jang boshlandi!"';
-    
-    document.getElementById('s-menu').classList.remove('active');
-    document.getElementById('s-game').classList.add('active');
   }
 
-  function exitToMenu() {
-    document.getElementById('s-game').classList.remove('active');
-    document.getElementById('s-menu').classList.add('active');
-  }
+  // ENEMY
+  if(enemyAction === "attack"){
 
-  function triggerPopup(text) {
-    let fx = document.getElementById('pop-fx');
-    fx.innerText = text;
-    fx.style.display = 'block';
-    setTimeout(() => fx.style.display = 'none', 400);
-  }
+    e.classList.add("attackE");
 
-  function executeAction(pChoice) {
-    if (isActionRunning || pHP <= 0 || eHP <= 0) return;
-    isActionRunning = true;
+    enemyST -= 15;
 
-    let eChoice = 'punch';
-    if (eStamina < 30) {
-      eChoice = Math.random() < 0.8 ? 'block' : 'punch';
-    } else {
-      eChoice = Math.random() < 0.5 ? 'punch' : 'block';
+    if(action === "block"){
+
+      p.classList.add("block");
+
+      text += "Siz himoyalandingiz<br>";
+
+    }else{
+
+      let dmg =
+        Math.floor(Math.random()*15)+10;
+
+      if(enemyST < 30){
+        dmg -= 5;
+      }
+
+      playerHP -= dmg;
+
+      p.classList.add("hit");
+
+      text += "Bot sizni urdi -" + dmg + " HP";
     }
+  }
 
-    let pBoxer = document.getElementById('p-boxer');
+  playerHP = Math.max(0,playerHP);
+  enemyHP = Math.max(0,enemyHP);
+
+  playerST += 5;
+  enemyST += 5;
+
+  if(playerST > 100) playerST = 100;
+  if(enemyST > 100) enemyST = 100;
+
+  updateUI();
+
+  document.getElementById("log").innerHTML = text;
+
+  if(playerHP <= 0){
+
+    setTimeout(()=>{
+      alert("Siz yutqazdingiz 😢");
+      location.reload();
+    },500);
+
+  }
+
+  if(enemyHP <= 0){
+
+    setTimeout(()=>{
+      alert("Siz yutdingiz 🏆");
+      location.reload();
+    },500);
+
+  }
+
+  setTimeout(()=>{
+    busy = false;
+  },500);
+}
+
+updateUI();
+
+</script>
+
+</body>
+</html>
+```
+
 
 
