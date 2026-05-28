@@ -39,27 +39,26 @@
   .stamina-fill { background: linear-gradient(90deg, #3498db, #2980b9); }
 
   /* REALISTIC RING */
-  .ring { background: linear-gradient(to bottom, #111122 0%, #1c1c32 100%); border: 4px solid #333; border-bottom: 8px solid #555; border-radius: 16px; height: 180px; position: relative; margin-bottom: 1rem; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 40px 10px; overflow: hidden; }
-  /* Ring Arqonlari */
+  .ring { background: linear-gradient(to bottom, #111122 0%, #1c1c32 100%); border: 4px solid #333; border-bottom: 8px solid #555; border-radius: 16px; height: 180px; position: relative; margin-bottom: 1rem; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 50px 20px; overflow: hidden; }
   .ring::before { content: ''; position: absolute; left: 0; right: 0; top: 40px; height: 4px; background: #e74c3c; opacity: 0.7; box-shadow: 0 40px 0 #fff, 0 80px 0 #3498db; }
   
-  /* Boxer Siluetlari */
-  .boxer { width: 70px; height: 110px; background-size: contain; background-repeat: no-repeat; background-position: bottom; position: relative; transition: all 0.2s ease; }
-  #p-boxer { background-image: url('https://icons8.com'); filter: drop-shadow(0 0 8px #2ecc71); }
-  #e-boxer { background-image: url('https://icons8.com'); transform: scaleX(-1); filter: drop-shadow(0 0 8px #e74c3c); }
+  /* Boxer Emojilari va Animatsiyalar */
+  .boxer { font-size: 3.5rem; position: relative; transition: all 0.2s ease; user-select: none; bottom: 0; }
+  #p-boxer { transform: scaleX(1); }
+  #e-boxer { transform: scaleX(-1); }
   
   /* Anims */
   .att-p { animation: attP 0.25s ease; }
   .att-e { animation: attE 0.25s ease; }
-  .hit-shake { animation: shake 0.2s ease; filter: brightness(2) saturate(3) !important; }
-  .block-state { transform: scale(0.9) translateY(5px) !important; opacity: 0.6; }
+  .hit-shake { animation: shake 0.2s ease; filter: brightness(2) saturate(3); }
+  .block-state { transform: scale(0.85) translateY(5px) !important; opacity: 0.6; }
 
-  @keyframes attP { 0%{ transform: translateX(0); } 50%{ transform: translateX(50px) scale(1.1); } 100%{ transform: translateX(0); } }
-  @keyframes attE { 0%{ transform: scaleX(-1) translateX(0); } 50%{ transform: scaleX(-1) translateX(50px) scale(1.1); } 100%{ transform: scaleX(-1) translateX(0); } }
+  @keyframes attP { 0%{ left: 0; } 50%{ left: 60px; transform: scale(1.1); } 100%{ left: 0; } }
+  @keyframes attE { 0%{ right: 0; } 50%{ right: 60px; transform: scaleX(-1) scale(1.1); } 100%{ right: 0; } }
   @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
   /* Damage FX Popup */
-  .damage-txt { position: absolute; top: 40px; font-size: 1.5rem; font-weight: 900; color: #f1c40f; animation: floatUp 0.4s ease-out forwards; display: none; text-shadow: 0 2px 4px #000; }
+  .damage-txt { position: absolute; top: 40px; left: 40%; font-size: 1.5rem; font-weight: 900; color: #f1c40f; animation: floatUp 0.4s ease-out forwards; display: none; text-shadow: 0 2px 4px #000; z-index: 5; }
   @keyframes floatUp { 0% { transform: translateY(0) scale(0.7); opacity: 1; } 100% { transform: translateY(-30px) scale(1.3); opacity: 0; } }
 
   /* Controls */
@@ -122,8 +121,8 @@
     <!-- REAL RING ARENA -->
     <div class="ring">
       <div id="pop-fx" class="damage-txt">💥 -20 HP</div>
-      <div id="p-boxer" class="boxer"></div>
-      <div id="e-boxer" class="boxer"></div>
+      <div id="p-boxer" class="boxer">🕺</div>
+      <div id="e-boxer" class="boxer">🥷</div>
     </div>
 
     <!-- REAL JANG TUGMALARI -->
@@ -160,8 +159,16 @@
     eHP = 100; eStamina = 100;
     isActionRunning = false;
     
-    document.getElementById('e-name').innerText = mode === 'pvp' ? 'Odam (CHEVChENKO)' : 'Raqib (BOT TAISON)';
-    document.getElementById('game-type').innerText = mode === 'pvp' ? 'LIVE MULTIPLAYER' : 'SINGLE TRAINING';
+    document.getElementById('p-boxer').innerText = "🕺";
+    if(mode === 'pvp') {
+      document.getElementById('e-name').innerText = 'Odam (CHEVChENKO)';
+      document.getElementById('game-type').innerText = 'LIVE MULTIPLAYER';
+      document.getElementById('e-boxer').innerText = "🥷";
+    } else {
+      document.getElementById('e-name').innerText = 'Raqib (BOT TAISON)';
+      document.getElementById('game-type').innerText = 'SINGLE TRAINING';
+      document.getElementById('e-boxer').innerText = "🤖";
+    }
     
     updateUIBars();
     document.getElementById('log-text').innerHTML = 'Smit referi: "Gong chalindi! Jang boshlandi!"';
@@ -175,10 +182,9 @@
     document.getElementById('s-menu').classList.add('active');
   }
 
-  function triggerPopup(text, leftPos) {
+  function triggerPopup(text) {
     let fx = document.getElementById('pop-fx');
     fx.innerText = text;
-    fx.style.left = leftPos + 'px';
     fx.style.display = 'block';
     setTimeout(() => fx.style.display = 'none', 400);
   }
@@ -187,7 +193,13 @@
     if (isActionRunning || pHP <= 0 || eHP <= 0) return;
     isActionRunning = true;
 
-    // Bot qarori (Taktik: agar staminasi kam bo'lsa ko'proq blok tanlaydi)
     let eChoice = 'punch';
     if (eStamina < 30) {
+      eChoice = Math.random() < 0.8 ? 'block' : 'punch';
+    } else {
+      eChoice = Math.random() < 0.5 ? 'punch' : 'block';
+    }
+
+    let pBoxer = document.getElementById('p-boxer');
+
 
