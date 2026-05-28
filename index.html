@@ -1,0 +1,377 @@
+!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BoksArena - Online Jang O'yini</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  #app { max-width: 500px; margin: 0 auto; padding: 1rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .logo { text-align: center; padding: 2rem 0 1rem; }
+  .logo h1 { font-size: 2.5rem; color: #a78bfa; }
+  .logo p { color: #888; font-size: 0.9rem; margin-top: 4px; }
+  .menu-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+  .menu-card h2 { font-size: 1rem; color: #a78bfa; margin-bottom: 1rem; }
+  .diff-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1rem; }
+  .diff-btn { background: #0f0f1a; border: 1px solid #2d2d4e; border-radius: 10px; padding: 0.75rem 0.5rem; cursor: pointer; color: #ccc; font-size: 0.8rem; text-align: center; transition: all .2s; }
+  .diff-btn:hover { border-color: #7c3aed; }
+  .diff-btn.sel { border-color: #a78bfa; background: #2d1b69; color: #fff; }
+  .diff-btn span { display: block; font-size: 1.2rem; margin-bottom: 4px; }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+  .mode-btn { background: #0f0f1a; border: 1px solid #2d2d4e; border-radius: 10px; padding: 1rem; cursor: pointer; color: #ccc; font-size: 0.85rem; text-align: center; transition: all .2s; }
+  .mode-btn:hover { border-color: #7c3aed; }
+  .mode-btn.sel { border-color: #a78bfa; background: #2d1b69; color: #fff; }
+  .mode-btn span { display: block; font-size: 1.5rem; margin-bottom: 6px; }
+  .mode-btn small { color: #888; font-size: 0.75rem; }
+  .start-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed, #a78bfa); border: none; border-radius: 12px; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+  .start-btn:hover { opacity: 0.9; }
+  .lobby-box { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1rem; }
+  .lobby-box h2 { color: #a78bfa; margin-bottom: 1rem; }
+  .room-code { font-size: 2.5rem; font-weight: 700; color: #fbbf24; letter-spacing: 8px; background: #0f0f1a; padding: 1rem 1.5rem; border-radius: 12px; margin: 1rem 0; display: inline-block; }
+  .lobby-box p { color: #888; font-size: 0.85rem; margin-bottom: 1rem; }
+  .waiting-dots { color: #a78bfa; font-size: 1.1rem; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .join-input-wrap { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .join-input { flex: 1; background: #0f0f1a; border: 1px solid #2d2d4e; border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 1.2rem; letter-spacing: 4px; text-align: center; text-transform: uppercase; }
+  .join-input:focus { outline: none; border-color: #a78bfa; }
+  .join-btn { background: #7c3aed; border: none; border-radius: 10px; padding: 12px 20px; color: #fff; font-weight: 600; cursor: pointer; }
+  .back-btn { background: transparent; border: 1px solid #2d2d4e; border-radius: 10px; padding: 10px 20px; color: #888; cursor: pointer; font-size: 0.85rem; width: 100%; margin-top: 8px; }
+  .fight-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .round-badge { background: #2d2d4e; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; color: #a78bfa; }
+  .mode-badge { background: #1a3a1a; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #4ade80; }
+  .fighters-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; margin-bottom: 0.75rem; }
+  .fighter { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 12px; padding: 0.75rem; }
+  .fighter.you { border-color: #e74c3c44; }
+  .fighter.enemy { border-color: #3498db44; }
+  .f-label { font-size: 0.7rem; color: #888; margin-bottom: 4px; }
+  .f-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .hp-wrap { background: #0f0f1a; border-radius: 4px; height: 8px; overflow: hidden; }
+  .hp-fill { height: 8px; border-radius: 4px; transition: width .3s; }
+  .hp-you { background: #e74c3c; }
+  .hp-enemy { background: #3498db; }
+  .hp-num { font-size: 0.7rem; color: #888; margin-top: 3px; }
+  .vs-txt { font-size: 1.2rem; color: #555; text-align: center; }
+  .arena { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 12px; padding: 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-around; min-height: 100px; }
+  .char-wrap { text-align: center; }
+  .char-emoji { font-size: 3rem; display: block; transition: transform .15s; }
+  .char-emoji.punch { transform: translateX(-20px) scale(1.2); }
+  .char-emoji.hit { transform: translateX(12px) rotate(10deg); }
+  .char-emoji.block-anim { transform: scale(0.9); }
+  .action-msg { font-size: 0.85rem; color: #a78bfa; text-align: center; }
+  .stamina-row { display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem; }
+  .st-label { font-size: 0.75rem; color: #888; min-width: 55px; }
+  .st-wrap { flex: 1; background: #0f0f1a; border-radius: 4px; height: 6px; }
+  .st-fill { height: 6px; border-radius: 4px; background: #fbbf24; transition: width .3s; }
+  .st-num { font-size: 0.75rem; color: #888; min-width: 28px; }
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0.75rem; }
+  .act-btn { padding: 12px 8px; border-radius: 10px; border: 1px solid; cursor: pointer; font-size: 0.82rem; font-weight: 600; background: #0f0f1a; transition: all .15s; }
+  .act-btn:hover { opacity: 0.85; transform: scale(1.02); }
+  .act-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-punch { border-color: #e74c3c; color: #e74c3c; }
+  .btn-kick { border-color: #f39c12; color: #f39c12; }
+  .btn-block { border-color: #3498db; color: #3498db; }
+  .btn-special { border-color: #a78bfa; color: #a78bfa; }
+  .log-box { background: #0f0f1a; border: 1px solid #1a1a2e; border-radius: 10px; padding: 0.75rem; max-height: 90px; overflow-y: auto; }
+  .log-line { font-size: 0.75rem; color: #666; padding: 1px 0; line-height: 1.5; }
+  .log-p { color: #e74c3c; }
+  .log-b { color: #3498db; }
+  .log-sys { color: #a78bfa; font-weight: 600; }
+  .result-wrap { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 16px; padding: 2rem; text-align: center; margin-top: 2rem; }
+  .result-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .result-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .result-win { color: #fbbf24; }
+  .result-lose { color: #ef4444; }
+  .result-sub { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .stat-box { background: #0f0f1a; border-radius: 10px; padding: 0.75rem; }
+  .stat-n { font-size: 1.4rem; font-weight: 700; color: #a78bfa; }
+  .stat-l { font-size: 0.7rem; color: #666; margin-top: 2px; }
+  .online-bar { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 10px; padding: 8px 14px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #888; }
+  .dot-yellow { width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; animation: pulse 1s infinite; }
+  .turn-indicator { text-align: center; font-size: 0.8rem; padding: 6px; border-radius: 8px; margin-bottom: 8px; font-weight: 600; }
+  .turn-you { background: #1a2e1a; color: #4ade80; }
+  .turn-enemy { background: #1a1a2e; color: #f87171; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="s-menu" class="screen active">
+  <div class="logo">
+    <h1>🥊 BoksArena</h1>
+    <p>Online jangavor o'yin</p>
+  </div>
+  <div class="menu-card">
+    <h2>🎮 O'yin rejimi</h2>
+    <div class="mode-grid">
+      <div class="mode-btn sel" id="mode-bot" onclick="selMode('bot',this)">
+        <span>🤖</span>Bot bilan<br><small>Offline, hoziroq</small>
+      </div>
+      <div class="mode-btn" id="mode-online" onclick="selMode('online',this)">
+        <span>🌐</span>Online<br><small>Do'stlar bilan</small>
+      </div>
+    </div>
+  </div>
+  <div class="menu-card" id="diff-section">
+    <h2>⚔️ Qiyinchilik</h2>
+    <div class="diff-grid">
+      <div class="diff-btn" onclick="selDiff('easy',this)"><span>🟢</span>Oson</div>
+      <div class="diff-btn sel" onclick="selDiff('medium',this)"><span>🟡</span>O'rta</div>
+      <div class="diff-btn" onclick="selDiff('hard',this)"><span>🔴</span>Qiyin</div>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startGame()">Jangga kirish ⚡</button>
+</div>
+
+<div id="s-lobby-create" class="screen">
+  <div class="logo"><h1>🥊 BoksArena</h1></div>
+  <div class="lobby-box">
+    <h2>Xona yaratildi!</h2>
+    <p>Do'stingizga bu kodni bering:</p>
+    <div class="room-code" id="room-code-display">----</div>
+    <p class="waiting-dots">Do'stingiz kirishini kutmoqda...</p>
+    <div class="online-bar" style="justify-content:center">
+      <div class="dot-yellow"></div>
+      <span id="lobby-status">1/2 o'yinchi</span>
+    </div>
+  </div>
+  <button class="back-btn" onclick="goMenu()">← Orqaga</button>
+</div>
+
+<div id="s-lobby-join" class="screen">
+  <div class="logo"><h1>🥊 BoksArena</h1></div>
+  <div class="lobby-box">
+    <h2>Xonaga kirish</h2>
+    <p>Do'stingizdan kodni oling:</p>
+    <div class="join-input-wrap">
+      <input class="join-input" id="join-code" maxlength="4" placeholder="XXXX" oninput="this.value=this.value.toUpperCase()">
+      <button class="join-btn" onclick="joinRoom()">Kirish</button>
+    </div>
+    <p id="join-error" style="color:#ef4444;font-size:0.8rem;min-height:18px"></p>
+  </div>
+  <button class="back-btn" onclick="goMenu()">← Orqaga</button>
+</div>
+
+<div id="s-fight" class="screen">
+  <div class="fight-header">
+    <div class="round-badge">Raund <span id="round-num">1</span>/3</div>
+    <div class="mode-badge" id="fight-mode-badge">🤖 Bot</div>
+  </div>
+  <div class="fighters-row">
+    <div class="fighter you">
+      <div class="f-label">Sen</div>
+      <div class="f-name" id="p-name">Botir</div>
+      <div class="hp-wrap"><div class="hp-fill hp-you" id="p-hp-bar" style="width:100%"></div></div>
+      <div class="hp-num" id="p-hp-txt">100/100</div>
+    </div>
+    <div class="vs-txt">VS</div>
+    <div class="fighter enemy">
+      <div class="f-label" id="enemy-label">Bot</div>
+      <div class="f-name" id="b-name">Raqib</div>
+      <div class="hp-wrap"><div class="hp-fill hp-enemy" id="b-hp-bar" style="width:100%"></div></div>
+      <div class="hp-num" id="b-hp-txt">100/100</div>
+    </div>
+  </div>
+  <div class="arena">
+    <div class="char-wrap"><span class="char-emoji" id="p-char">🥊</span></div>
+    <div class="action-msg" id="action-msg">Tayyor!</div>
+    <div class="char-wrap"><span class="char-emoji" id="b-char">🤖</span></div>
+  </div>
+  <div class="turn-indicator turn-you" id="turn-indicator">Sizning navbatingiz!</div>
+  <div class="stamina-row">
+    <span class="st-label">Stamina</span>
+    <div class="st-wrap"><div class="st-fill" id="st-bar" style="width:100%"></div></div>
+    <span class="st-num" id="st-txt">100</span>
+  </div>
+  <div class="actions-grid">
+    <button class="act-btn btn-punch" onclick="playerAction('punch')">🥊 Musht<br><small>15–25 zarar | 15 st</small></button>
+    <button class="act-btn btn-kick" onclick="playerAction('kick')">🦵 Tepki<br><small>20–35 zarar | 25 st</small></button>
+    <button class="act-btn btn-block" onclick="playerAction('block')">🛡 Himoya<br><small>Zarba kamaytiradi</small></button>
+    <button class="act-btn btn-special" onclick="playerAction('special')">⚡ Maxsus<br><small>40 zarar | 40 st</small></button>
+  </div>
+  <div class="log-box" id="log-box"></div>
+</div>
+
+<div id="s-result" class="screen">
+  <div class="result-wrap">
+    <div class="result-icon" id="r-icon">🏆</div>
+    <div class="result-title" id="r-title">G'alaba!</div>
+    <div class="result-sub" id="r-sub">Siz botni mag'lub etdingiz!</div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-n" id="r-rounds">0</div><div class="stat-l">Raundlar</div></div>
+      <div class="stat-box"><div class="stat-n" id="r-dmg">0</div><div class="stat-l">Zarba berildi</div></div>
+      <div class="stat-box"><div class="stat-n" id="r-blocked">0</div><div class="stat-l">Bloklar</div></div>
+    </div>
+    <button class="start-btn" onclick="goMenu()">🔄 Qaytadan o'ynash</button>
+  </div>
+</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+let firebaseReady = false;
+try { firebase.initializeApp(firebaseConfig); firebaseReady = !firebaseConfig.apiKey.includes('YOUR'); } catch(e) {}
+
+let mode='bot', diff='medium', pHp=100, bHp=100, round=1, maxRound=3, stamina=100;
+let blocked=0, totalDmg=0, roundsDone=0, busy=false, pBlocking=false, myTurn=true;
+let roomRef=null, roomCode=null, myRole=null;
+
+const diffCfg = {
+  easy:   {botDmg:[5,12],  blockChance:0.15, specialChance:0.08, speed:1000},
+  medium: {botDmg:[10,20], blockChance:0.35, specialChance:0.18, speed:700},
+  hard:   {botDmg:[15,28], blockChance:0.55, specialChance:0.30, speed:450}
+};
+
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function randCode(){ return Math.random().toString(36).substr(2,4).toUpperCase(); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function log(msg,cls){ const box=document.getElementById('log-box'); const line=document.createElement('div'); line.className='log-line'+(cls?' '+cls:''); line.textContent=msg; box.appendChild(line); box.scrollTop=box.scrollHeight; }
+function setMsg(txt){ document.getElementById('action-msg').textContent=txt; }
+function anim(id,cls,ms){ const el=document.getElementById(id); if(!el)return; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms||300); }
+function setBtns(on){ document.querySelectorAll('.act-btn').forEach(b=>b.disabled=!on); }
+function updateBars(){
+  const ph=Math.max(0,pHp), bh=Math.max(0,bHp);
+  document.getElementById('p-hp-bar').style.width=ph+'%';
+  document.getElementById('b-hp-bar').style.width=bh+'%';
+  document.getElementById('p-hp-txt').textContent=ph+'/100';
+  document.getElementById('b-hp-txt').textContent=bh+'/100';
+  document.getElementById('st-bar').style.width=Math.round(stamina)+'%';
+  document.getElementById('st-txt').textContent=Math.round(stamina);
+}
+function updateTurnIndicator(){
+  const el=document.getElementById('turn-indicator');
+  if(mode==='bot'){ el.className='turn-indicator turn-you'; el.textContent='Sizning navbatingiz!'; return; }
+  if(myTurn){ el.className='turn-indicator turn-you'; el.textContent='Sizning navbatingiz!'; setBtns(true); }
+  else { el.className='turn-indicator turn-enemy'; el.textContent="Raqib o'ylayapti..."; setBtns(false); }
+}
+function selMode(m,el){ mode=m; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); document.getElementById('diff-section').style.display=m==='bot'?'block':'none'; }
+function selDiff(d,el){ diff=d; document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+function goMenu(){ if(roomRef){roomRef.off();roomRef=null;} showScreen('s-menu'); }
+function startGame(){
+  if(mode==='bot'){ initFight(); return; }
+  if(!firebaseReady){ alert("Firebase sozlanmagan! YOUR_API_KEY ni o'zingiznikiga almashtiring."); return; }
+  const choice=confirm("Yangi xona yaratish uchun OK.\nMavjud xonaga kirish uchun Bekor qilish.");
+  if(choice) createRoom(); else { showScreen('s-lobby-join'); document.getElementById('join-error').textContent=''; }
+}
+function createRoom(){
+  roomCode=randCode(); myRole='host';
+  document.getElementById('room-code-display').textContent=roomCode;
+  showScreen('s-lobby-create');
+  roomRef=firebase.database().ref('rooms/'+roomCode);
+  roomRef.set({host:{hp:100},guest:null,state:'waiting',lastAction:null,turn:'host'});
+  roomRef.on('value',snap=>{
+    const data=snap.val(); if(!data)return;
+    if(data.state==='waiting'&&data.guest){ document.getElementById('lobby-status').textContent='2/2 — Jang boshlanmoqda!'; setTimeout(()=>initOnlineFight(),800); }
+    if(data.state==='fighting') syncOnlineState(data);
+  });
+}
+function joinRoom(){
+  const code=document.getElementById('join-code').value.toUpperCase().trim();
+  if(code.length!==4){document.getElementById('join-error').textContent="4 ta harf kiriting!";return;}
+  const ref=firebase.database().ref('rooms/'+code);
+  ref.once('value',snap=>{
+    const data=snap.val();
+    if(!data){document.getElementById('join-error').textContent="Xona topilmadi!";return;}
+    if(data.guest){document.getElementById('join-error').textContent="Xona to'liq!";return;}
+    roomCode=code; myRole='guest'; roomRef=ref;
+    roomRef.update({guest:{hp:100},state:'fighting'});
+    roomRef.on('value',snap2=>{ const d=snap2.val(); if(d&&d.state==='fighting')syncOnlineState(d); });
+    initOnlineFight();
+  });
+}
+function initOnlineFight(){
+  pHp=100;bHp=100;round=1;stamina=100;blocked=0;totalDmg=0;roundsDone=0;busy=false;pBlocking=false;
+  myTurn=(myRole==='host');
+  document.getElementById('fight-mode-badge').textContent='🌐 Online';
+  document.getElementById('enemy-label').textContent='Raqib';
+  document.getElementById('b-char').textContent='🥊';
+  document.getElementById('b-name').textContent=myRole==='host'?'Mehmon':"Xo'jayin";
+  document.getElementById('p-name').textContent=myRole==='host'?"Xo'jayin":'Mehmon';
+  document.getElementById('log-box').innerHTML='';
+  updateBars(); updateTurnIndicator(); showScreen('s-fight');
+  log('--- Online jang boshlandi! ---','log-sys');
+}
+function syncOnlineState(data){
+  if(!data.lastAction||data.lastAction.by===myRole)return;
+  applyAction(data.lastAction.type,data.lastAction.dmg);
+}
+function initFight(){
+  pHp=100;bHp=100;round=1;stamina=100;blocked=0;totalDmg=0;roundsDone=0;busy=false;pBlocking=false;
+  document.getElementById('fight-mode-badge').textContent='🤖 Bot';
+  document.getElementById('enemy-label').textContent='Bot';
+  document.getElementById('b-char').textContent='🤖';
+  document.getElementById('b-name').textContent='RoboBot';
+  document.getElementById('p-name').textContent='Botir';
+  document.getElementById('round-num').textContent='1';
+  document.getElementById('log-box').innerHTML='';
+  updateBars(); setBtns(true); setMsg('Jang boshlandi!'); showScreen('s-fight');
+  log('--- Raund 1 boshlandi ---','log-sys');
+}
+function playerAction(act){
+  if(busy)return; if(mode==='online'&&!myTurn)return;
+  busy=true; setBtns(false); pBlocking=false;
+  const need={punch:15,kick:25,block:0,special:40}[act];
+  if(stamina<need){log('Stamina yetarli emas! ('+need+' kerak)','log-sys');busy=false;setBtns(true);return;}
+  let dmg=0;
+  if(act==='punch'){dmg=rand(15,25);stamina=Math.max(0,stamina-15);anim('p-char','punch');setTimeout(()=>anim('b-char','hit'),150);log('Sen: Musht! '+dmg+' zarar','log-p');}
+  else if(act==='kick'){dmg=rand(20,35);stamina=Math.max(0,stamina-25);anim('p-char','punch');setTimeout(()=>anim('b-char','hit'),150);log('Sen: Tepki! '+dmg+' zarar','log-p');}
+  else if(act==='block'){stamina=Math.min(100,stamina+20);pBlocking=true;blocked++;anim('p-char','block-anim');log('Sen: Himoyalanmoqda...','log-p');}
+  else if(act==='special'){dmg=40;stamina=Math.max(0,stamina-40);anim('p-char','punch');setTimeout(()=>anim('b-char','hit'),150);log('Sen: MAXSUS ZARBA! 40 zarar!','log-p');}
+  totalDmg+=dmg; bHp=Math.max(0,bHp-dmg); updateBars(); setMsg(act==='block'?'Himoya!':'Zarba!');
+  if(mode==='online'){ pushOnlineAction(act,dmg); myTurn=false; updateTurnIndicator(); busy=false; if(bHp<=0)endRound('player'); return; }
+  if(bHp<=0){endRound('player');return;}
+  setTimeout(()=>botTurn(),diffCfg[diff].speed);
+}
+function applyAction(act,dmg){
+  if(dmg>0){ if(pBlocking)dmg=Math.floor(dmg*0.3); pHp=Math.max(0,pHp-dmg); anim('b-char','punch'); setTimeout(()=>anim('p-char','hit'),150); log('Raqib: '+act+'! '+dmg+' zarar','log-b'); }
+  else { log('Raqib: Himoyalandi','log-b'); }
+  updateBars(); if(pHp<=0){endRound('bot');return;} myTurn=true; updateTurnIndicator(); busy=false;
+}
+function pushOnlineAction(act,dmg){ if(!roomRef)return; roomRef.update({lastAction:{type:act,dmg:dmg,by:myRole,ts:Date.now()},turn:myRole==='host'?'guest':'host'}); }
+function botTurn(){
+  const cfg=diffCfg[diff]; let botDmg=0,botAct=''; const r=Math.random();
+  if(r<cfg.specialChance){botDmg=rand(25,35);botAct='maxsus zarba';}
+  else if(r<cfg.specialChance+cfg.blockChance){botDmg=0;botAct='himoyalandi';stamina=Math.max(0,stamina-5);}
+  else{botDmg=rand(cfg.botDmg[0],cfg.botDmg[1]);botAct='zarba';}
+  if(pBlocking&&botDmg>0)botDmg=Math.floor(botDmg*0.3);
+  if(botDmg>0){anim('b-char','punch');setTimeout(()=>anim('p-char','hit'),150);pHp=Math.max(0,pHp-botDmg);log('Bot: '+botAct+'! '+botDmg+' zarar','log-b');setMsg('Bot zarba berdi!');}
+  else{log('Bot: '+botAct,'log-b');setMsg('Bot himoyalandi');}
+  stamina=Math.min(100,stamina+8); pBlocking=false; updateBars();
+  if(pHp<=0){endRound('bot');return;} busy=false; setBtns(true);
+}
+function endRound(winner){
+  roundsDone++; setBtns(false);
+  if(winner==='player'){log('--- Bot nokaut! Raund yutildi! ---','log-sys');setMsg('Raund yutildi!');bHp=100;pHp=Math.min(100,pHp+25);}
+  else{log('--- Nokaut! Bot raundni yutdi! ---','log-sys');setMsg("Raund yo'qotildi...");pHp=100;bHp=Math.min(100,bHp+25);}
+  round++; if(round>maxRound){setTimeout(()=>showResult(pHp>=bHp),800);return;}
+  document.getElementById('round-num').textContent=round; stamina=100; updateBars();
+  log('--- Raund '+round+' boshlandi ---','log-sys');
+  setTimeout(()=>{ busy=false; if(mode==='bot')setBtns(true); else{myTurn=true;updateTurnIndicator();} },500);
+}
+function showResult(win){
+  document.getElementById('r-icon').textContent=win?'🏆':'😔';
+  document.getElementById('r-title').className='result-title '+(win?'result-win':'result-lose');
+  document.getElementById('r-title').textContent=win?"G'alaba!":"Mag'lubiyat";
+  document.getElementById('r-sub').textContent=win?"Siz g'olib bo'ldingiz!":'Qaytadan urining!';
+  document.getElementById('r-rounds').textContent=roundsDone;
+  document.getElementById('r-dmg').textContent=totalDmg;
+  document.getElementById('r-blocked').textContent=blocked;
+  if(roomRef){roomRef.remove();roomRef=null;} showScreen('s-result');
+}
+</script>
+</body>
+</html>
